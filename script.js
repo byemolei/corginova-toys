@@ -75,8 +75,10 @@ const cartDrawer = document.querySelector(".cart-drawer");
 const cartItemsEl = document.querySelector("[data-cart-items]");
 const cartTotalEl = document.querySelector("[data-cart-total]");
 const cartCountEls = document.querySelectorAll("[data-cart-count]");
+const checkoutLink = document.querySelector("[data-checkout-link]");
 const toastEl = document.querySelector("[data-toast]");
 const cart = new Map();
+let checkoutSettings = fallbackStore.settings;
 let observer;
 
 init();
@@ -90,6 +92,7 @@ async function init() {
   renderProducts(products);
   renderFilters(products);
   renderContact(store.settings);
+  checkoutSettings = { ...fallbackStore.settings, ...(store.settings || {}) };
   initReveal();
   initCart();
   initFilters();
@@ -137,7 +140,7 @@ function renderProducts(products) {
               <span class="price">${price}</span>
               <button type="button" data-add-cart data-name="${escapeAttr(product.name)}" data-price="${Number(
                 product.price || 0
-              )}">Add</button>
+              )}">Add to cart</button>
             </div>
           </div>
         </article>
@@ -264,6 +267,37 @@ function initCart() {
     });
   });
 
+  if (cartItemsEl) {
+    cartItemsEl.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-cart-action]");
+      if (!button) return;
+
+      const name = button.dataset.name;
+      const item = cart.get(name);
+      if (!item) return;
+
+      if (button.dataset.cartAction === "increase") {
+        item.qty += 1;
+        cart.set(name, item);
+      }
+
+      if (button.dataset.cartAction === "decrease") {
+        item.qty -= 1;
+        if (item.qty <= 0) {
+          cart.delete(name);
+        } else {
+          cart.set(name, item);
+        }
+      }
+
+      if (button.dataset.cartAction === "remove") {
+        cart.delete(name);
+      }
+
+      renderCart();
+    });
+  }
+
   document.querySelectorAll("[data-cart-open]").forEach((button) => {
     button.addEventListener("click", openCart);
   });
@@ -308,6 +342,7 @@ function renderCart() {
     el.textContent = count;
   });
   cartTotalEl.textContent = formatPrice(total);
+  updateCheckoutLink(items, total);
 
   if (items.length === 0) {
     cartItemsEl.innerHTML = '<p class="empty-cart">Your cart is waiting for a corgi-sized upgrade.</p>';
@@ -318,15 +353,66 @@ function renderCart() {
     .map(
       (item) => `
         <div class="cart-line">
-          <div>
+          <div class="cart-line-info">
             <strong>${escapeHtml(item.name)}</strong>
-            <span>Qty ${item.qty}</span>
+            <span>${formatPrice(item.price)} each</span>
+            <button class="remove-line" type="button" data-cart-action="remove" data-name="${escapeAttr(item.name)}">
+              Remove
+            </button>
+          </div>
+          <div class="cart-line-controls" aria-label="Change quantity for ${escapeAttr(item.name)}">
+            <button type="button" data-cart-action="decrease" data-name="${escapeAttr(item.name)}" aria-label="Decrease ${
+        escapeAttr(item.name)
+      } quantity">-</button>
+            <span>${item.qty}</span>
+            <button type="button" data-cart-action="increase" data-name="${escapeAttr(item.name)}" aria-label="Increase ${
+        escapeAttr(item.name)
+      } quantity">+</button>
           </div>
           <strong>${formatPrice(item.price * item.qty)}</strong>
         </div>
       `
     )
     .join("");
+}
+
+function updateCheckoutLink(items, total) {
+  if (!checkoutLink) return;
+
+  const email = checkoutSettings.order_email || fallbackStore.settings.order_email;
+  const businessName = checkoutSettings.business_name || fallbackStore.settings.business_name;
+  const subject = encodeURIComponent(`${businessName} order request`);
+
+  if (!items.length) {
+    checkoutLink.href = "#collection";
+    checkoutLink.textContent = "Add toys before checkout";
+    checkoutLink.removeAttribute("target");
+    checkoutLink.setAttribute("aria-disabled", "true");
+    return;
+  }
+
+  const lines = items.map(
+    (item) => `- ${item.name} x ${item.qty}: ${formatPrice(item.price * item.qty)}`
+  );
+  const body = encodeURIComponent(
+    [
+      "Hi, I would like to order:",
+      "",
+      ...lines,
+      "",
+      `Estimated total: ${formatPrice(total)}`,
+      "",
+      "My shipping address:",
+      "",
+      "Preferred payment method:",
+      "",
+      "Please send payment and shipping instructions. Thank you.",
+    ].join("\n")
+  );
+
+  checkoutLink.href = `mailto:${email}?subject=${subject}&body=${body}`;
+  checkoutLink.textContent = "Email order with cart";
+  checkoutLink.removeAttribute("aria-disabled");
 }
 
 let toastTimer;
