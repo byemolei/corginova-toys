@@ -1,0 +1,72 @@
+{
+  "products": [
+    {
+      "id": "aqua-grip-chew-bar",
+      "name": "Aqua Grip Chew Bar",
+      "category": "chew",
+      "tag": "Daily chew system",
+      "description": "Raised texture, easy-grip shape, and a satisfying chew feel for corgis that need a job.",
+      "price": 16,
+      "image_url": "assets/chew-toy.png",
+      "image_alt": "Teal textured corgi chew toy",
+      "badge": "Chew",
+      "sale_label": "",
+      "is_featured": false,
+      "is_active": true,
+      "sort_order": 10
+    },
+    {
+      "id": "nebula-tug-rope",
+      "name": "Nebula Tug Rope",
+      "category": "tug",
+      "tag": "Interactive play",
+      "description": "Bright braided cotton rope for hallway tug sessions, fetch games, and training rewards.",
+      "price": 12,
+      "image_url": "assets/rope-toy.png",
+      "image_alt": "Colorful braided rope toy for corgis",
+      "badge": "Tug",
+      "sale_label": "",
+      "is_featured": false,
+      "is_active": true,
+      "sort_order": 20
+    },
+    {
+      "id": "solar-snack-sphere",
+      "name": "Solar Snack Sphere",
+      "category": "puzzle",
+      "tag": "Mental enrichment",
+      "description": "Load treats, roll, sniff, repeat. A smart boredom breaker for food-motivated corgis.",
+      "price": 18,
+      "image_url": "assets/puzzle-ball.png",
+      "image_alt": "Yellow treat puzzle ball for corgis",
+      "badge": "Puzzle",
+      "sale_label": "",
+      "is_featured": false,
+      "is_active": true,
+      "sort_order": 30
+    },
+    {
+      "id": "corginova-starter-pack",
+      "name": "CorgiNova Starter Pack",
+      "category": "bundle",
+      "tag": "Launch kit",
+      "description": "Four toy styles in one shelf-ready kit: chew, tug, puzzle, and plush comfort play.",
+      "price": 49,
+      "image_url": "assets/corgi-toy-bundle.png",
+      "image_alt": "Premium bundle of corgi-sized dog toys",
+      "badge": "Bundle",
+      "sale_label": "",
+      "is_featured": true,
+      "is_active": true,
+      "sort_order": 40
+    }
+  ],
+  "settings": {
+    "business_name": "CorgiNova Toys",
+    "order_email": "hello@example.com",
+    "contact_heading": "Start with email orders. Upgrade to checkout later.",
+    "contact_body": "Replace the contact details below with your real email, business name, and preferred US fulfillment details.",
+    "ships_from": "United States",
+    "payment_methods": "Email order request, PayPal invoice, or manual payment instructions."
+  }
+}
