@@ -98,6 +98,7 @@ async function init() {
   initFilters();
   initCounters();
   initCursorGlow();
+  initProductMotion();
 }
 
 async function loadStoreData() {
@@ -119,15 +120,16 @@ function renderProducts(products) {
   if (!productGrid) return;
 
   productGrid.innerHTML = products
-    .map((product) => {
+    .map((product, index) => {
       const price = formatPrice(product.price);
       const cardClass = product.is_featured ? "product-card product-card-wide reveal" : "product-card reveal";
       const badge = product.sale_label || product.badge || product.category || "New";
+      const hue = (index * 37 + 185) % 360;
 
       return `
-        <article class="${cardClass}" data-category="${escapeAttr(product.category || "all")}">
+        <article class="${cardClass}" data-category="${escapeAttr(product.category || "all")}" style="--product-hue: ${hue}deg">
           <div class="product-image">
-            <img src="${escapeAttr(product.image_url || "assets/chew-toy.png")}" alt="${escapeAttr(
+            <img src="${escapeAttr(product.image_url || "assets/chew-toy.png")}" loading="lazy" decoding="async" alt="${escapeAttr(
               product.image_alt || product.name
             )}">
             <span class="badge">${escapeHtml(badge)}</span>
@@ -431,6 +433,34 @@ function initCursorGlow() {
     if (!glow) return;
     glow.style.left = `${event.clientX}px`;
     glow.style.top = `${event.clientY}px`;
+  });
+}
+
+function initProductMotion() {
+  if (!productGrid) return;
+
+  productGrid.addEventListener("pointermove", (event) => {
+    const card = event.target.closest(".product-card");
+    if (!card || !productGrid.contains(card)) return;
+
+    const rect = card.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    const rotateY = (x - 50) / 11;
+    const rotateX = (50 - y) / 13;
+
+    card.style.setProperty("--mx", `${x}%`);
+    card.style.setProperty("--my", `${y}%`);
+    card.style.setProperty("--rx", `${rotateX}deg`);
+    card.style.setProperty("--ry", `${rotateY}deg`);
+  });
+
+  productGrid.addEventListener("pointerout", (event) => {
+    const card = event.target.closest(".product-card");
+    if (!card || card.contains(event.relatedTarget)) return;
+
+    card.style.removeProperty("--rx");
+    card.style.removeProperty("--ry");
   });
 }
 

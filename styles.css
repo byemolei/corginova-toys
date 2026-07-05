@@ -34,6 +34,31 @@ body {
   line-height: 1.55;
 }
 
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  z-index: -3;
+  pointer-events: none;
+}
+
+body::before {
+  background:
+    linear-gradient(112deg, transparent 0 28%, rgba(55, 232, 255, 0.16) 34%, transparent 43%),
+    linear-gradient(68deg, transparent 0 42%, rgba(255, 211, 92, 0.14) 47%, transparent 56%),
+    linear-gradient(148deg, transparent 0 54%, rgba(255, 79, 216, 0.14) 60%, transparent 70%);
+  animation: auroraSweep 18s ease-in-out infinite alternate;
+}
+
+body::after {
+  background-image:
+    repeating-linear-gradient(90deg, transparent 0 80px, rgba(255, 255, 255, 0.025) 81px, transparent 82px),
+    repeating-linear-gradient(0deg, transparent 0 112px, rgba(55, 232, 255, 0.025) 113px, transparent 114px);
+  opacity: 0.7;
+  animation: gridDrift 28s linear infinite;
+}
+
 body.cart-open {
   overflow: hidden;
 }
@@ -159,6 +184,19 @@ button {
   isolation: isolate;
 }
 
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(110deg, transparent 0 36%, rgba(117, 255, 184, 0.1) 42%, transparent 50%),
+    linear-gradient(75deg, transparent 0 58%, rgba(255, 211, 92, 0.12) 64%, transparent 72%);
+  mix-blend-mode: screen;
+  animation: heroPrism 8s ease-in-out infinite alternate;
+}
+
 .hero-media {
   position: absolute;
   inset: 0;
@@ -188,6 +226,84 @@ button {
   border-radius: 50%;
   box-shadow: inset 0 0 35px rgba(55, 232, 255, 0.1), 0 0 45px rgba(255, 79, 216, 0.12);
   pointer-events: none;
+}
+
+.hero-ribbons {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hero-ribbons span {
+  position: absolute;
+  width: 48vw;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(55, 232, 255, 0.88), rgba(255, 79, 216, 0.78), transparent);
+  filter: drop-shadow(0 0 18px rgba(55, 232, 255, 0.54));
+  transform: rotate(-18deg);
+  animation: ribbonFly 8s linear infinite;
+}
+
+.hero-ribbons span:nth-child(1) {
+  top: 24%;
+  right: -18%;
+}
+
+.hero-ribbons span:nth-child(2) {
+  top: 52%;
+  right: -28%;
+  animation-delay: -2.5s;
+}
+
+.hero-ribbons span:nth-child(3) {
+  top: 75%;
+  right: -12%;
+  animation-delay: -5s;
+}
+
+.hero-showcase {
+  position: absolute;
+  right: clamp(18px, 5vw, 92px);
+  bottom: clamp(42px, 7vw, 96px);
+  z-index: 2;
+  width: min(42vw, 560px);
+  height: min(35vw, 430px);
+  pointer-events: none;
+  perspective: 1100px;
+}
+
+.hero-showcase img {
+  position: absolute;
+  width: clamp(130px, 18vw, 250px);
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.5), 0 0 42px rgba(55, 232, 255, 0.25);
+  animation: productHover 5.5s ease-in-out infinite alternate;
+}
+
+.hero-showcase .showcase-a {
+  right: 34%;
+  bottom: 6%;
+  transform: rotate(-8deg);
+}
+
+.hero-showcase .showcase-b {
+  right: 2%;
+  bottom: 28%;
+  transform: rotate(9deg) scale(0.92);
+  animation-delay: -1.6s;
+}
+
+.hero-showcase .showcase-c {
+  right: 18%;
+  top: 0;
+  transform: rotate(4deg) scale(0.78);
+  animation-delay: -3.1s;
 }
 
 .orbit-one {
@@ -435,13 +551,34 @@ details,
 
 .product-card {
   overflow: hidden;
+  position: relative;
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
   transition: opacity 0.24s ease, transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+  will-change: transform;
+}
+
+.product-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at var(--mx, 50%) var(--my, 40%), hsla(var(--product-hue, 190deg), 100%, 72%, 0.2), transparent 34%),
+    linear-gradient(135deg, transparent 0 42%, rgba(255, 255, 255, 0.13) 48%, transparent 55%);
+  opacity: 0;
+  transition: opacity 0.22s ease;
 }
 
 .product-card:hover {
-  transform: translateY(-9px);
+  transform: perspective(900px) translateY(-9px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
   border-color: rgba(55, 232, 255, 0.5);
   box-shadow: 0 30px 90px rgba(55, 232, 255, 0.16);
+}
+
+.product-card:hover::before {
+  opacity: 1;
 }
 
 .product-card.hidden {
@@ -457,6 +594,22 @@ details,
 .product-image {
   position: relative;
   overflow: hidden;
+  transform: translateZ(28px);
+}
+
+.product-image::after {
+  content: "";
+  position: absolute;
+  inset: -40% -65%;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.3) 48%, transparent 60%);
+  transform: translateX(-35%) rotate(4deg);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.product-card:hover .product-image::after {
+  opacity: 1;
+  animation: imageSweep 1.05s ease;
 }
 
 .product-image img {
@@ -525,9 +678,18 @@ details,
   padding: 9px 16px;
   border: 0;
   border-radius: 8px;
-  background: rgba(55, 232, 255, 0.16);
+  background:
+    linear-gradient(135deg, rgba(55, 232, 255, 0.2), rgba(255, 79, 216, 0.18)),
+    rgba(55, 232, 255, 0.16);
   color: white;
   font-weight: 900;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 0 0 rgba(55, 232, 255, 0);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.price-row button:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), 0 16px 28px rgba(55, 232, 255, 0.18);
 }
 
 .promise {
@@ -665,7 +827,9 @@ details p {
   width: min(440px, 100%);
   height: 100%;
   padding: 24px;
-  background: #080d1c;
+  background:
+    linear-gradient(180deg, rgba(55, 232, 255, 0.08), transparent 28%),
+    #080d1c;
   border-left: 1px solid var(--line);
   box-shadow: -22px 0 60px rgba(0, 0, 0, 0.36);
   transform: translateX(100%);
@@ -858,6 +1022,66 @@ details p {
   }
 }
 
+@keyframes auroraSweep {
+  from {
+    transform: translate3d(-3%, -1%, 0) scale(1);
+    opacity: 0.86;
+  }
+
+  to {
+    transform: translate3d(3%, 2%, 0) scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes gridDrift {
+  to {
+    transform: translate3d(-82px, -114px, 0);
+  }
+}
+
+@keyframes heroPrism {
+  from {
+    opacity: 0.42;
+    transform: translateX(-2%);
+  }
+
+  to {
+    opacity: 0.78;
+    transform: translateX(2%);
+  }
+}
+
+@keyframes ribbonFly {
+  from {
+    transform: translateX(0) rotate(-18deg);
+  }
+
+  to {
+    transform: translateX(-120vw) rotate(-18deg);
+  }
+}
+
+@keyframes productHover {
+  from {
+    translate: 0 0;
+  }
+
+  to {
+    translate: 0 -18px;
+  }
+}
+
+@keyframes imageSweep {
+  from {
+    transform: translateX(-42%) rotate(4deg);
+  }
+
+  to {
+    transform: translateX(42%) rotate(4deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -870,6 +1094,13 @@ details p {
 
   .cursor-glow {
     display: none;
+  }
+
+  body::before,
+  body::after,
+  .hero-ribbons,
+  .hero-showcase {
+    animation: none !important;
   }
 }
 
@@ -900,6 +1131,18 @@ details p {
     margin: 0 auto;
     align-self: start;
     padding-top: 72px;
+  }
+
+  .hero-showcase {
+    right: 20px;
+    bottom: 24px;
+    width: min(76vw, 430px);
+    height: 250px;
+    opacity: 0.78;
+  }
+
+  .hero-showcase img {
+    width: clamp(92px, 26vw, 160px);
   }
 
   .intro,
@@ -945,6 +1188,14 @@ details p {
 
   .hero {
     min-height: 780px;
+  }
+
+  .hero-showcase {
+    display: none;
+  }
+
+  .hero-ribbons span {
+    width: 86vw;
   }
 
   .hero-content {
