@@ -48,7 +48,7 @@ function bindEvents() {
       form.get("password") === adminConfig.password;
 
     if (!isValid) {
-      showToast("Wrong username or password.");
+      showToast("用户名或密码不正确。");
       return;
     }
 
@@ -64,7 +64,7 @@ function bindEvents() {
 
   saveTokenButton.addEventListener("click", async () => {
     localStorage.setItem(tokenKey, tokenInput.value.trim());
-    showToast("GitHub token saved in this browser.");
+    showToast("GitHub token 已保存在当前浏览器。");
     await loadAdminData();
   });
 
@@ -127,9 +127,9 @@ function renderProductList() {
           <img src="${escapeAttr(relativeImage(product.image_url || "../assets/chew-toy.png"))}" alt="">
           <span>
             <strong>${escapeHtml(product.name)}</strong>
-            <span>${escapeHtml(product.category)} · $${Number(product.price || 0).toFixed(2)}</span>
+            <span>${escapeHtml(categoryLabel(product.category))} · $${Number(product.price || 0).toFixed(2)}</span>
           </span>
-          <span>${product.is_active === false ? "Hidden" : "Live"}</span>
+          <span>${product.is_active === false ? "隐藏" : "显示中"}</span>
         </button>
       `
     )
@@ -159,44 +159,53 @@ function selectProduct(id) {
 
 async function saveProduct(event) {
   event.preventDefault();
-  requireToken();
+  try {
+    requireToken();
 
-  const values = Object.fromEntries(new FormData(productForm));
-  const file = productForm.elements.image_file.files[0];
-  const id = values.id || slugify(values.name);
-  let imageUrl = values.image_url || "";
+    const values = Object.fromEntries(new FormData(productForm));
+    const file = productForm.elements.image_file.files[0];
+    const id = values.id || slugify(values.name);
+    let imageUrl = values.image_url || "";
 
-  if (file) {
-    imageUrl = await uploadImage(file);
+    if (!values.name || !values.price) {
+      showToast("请至少填写商品名称和价格。");
+      return;
+    }
+
+    if (file) {
+      imageUrl = await uploadImage(file);
+    }
+
+    const product = {
+      id,
+      name: values.name,
+      category: values.category,
+      tag: values.tag || "",
+      description: values.description || "",
+      price: Number(values.price || 0),
+      image_url: imageUrl,
+      image_alt: values.image_alt || values.name,
+      badge: values.badge || "",
+      sale_label: values.sale_label || "",
+      is_featured: Boolean(values.is_featured),
+      is_active: Boolean(values.is_active),
+      sort_order: Number(values.sort_order || 100),
+    };
+
+    const index = store.products.findIndex((item) => item.id === values.id);
+    if (index >= 0) {
+      store.products[index] = product;
+    } else {
+      store.products.push(product);
+    }
+
+    await publishStoreData(`更新商品：${product.name}`);
+    showToast("商品已保存并发布，网站稍等会自动更新。");
+    await loadAdminData();
+    selectProduct(id);
+  } catch (error) {
+    showToast(error.message);
   }
-
-  const product = {
-    id,
-    name: values.name,
-    category: values.category,
-    tag: values.tag || "",
-    description: values.description || "",
-    price: Number(values.price || 0),
-    image_url: imageUrl,
-    image_alt: values.image_alt || values.name,
-    badge: values.badge || "",
-    sale_label: values.sale_label || "",
-    is_featured: Boolean(values.is_featured),
-    is_active: Boolean(values.is_active),
-    sort_order: Number(values.sort_order || 100),
-  };
-
-  const index = store.products.findIndex((item) => item.id === values.id);
-  if (index >= 0) {
-    store.products[index] = product;
-  } else {
-    store.products.push(product);
-  }
-
-  await publishStoreData(`Update product: ${product.name}`);
-  showToast("Product saved and published.");
-  await loadAdminData();
-  selectProduct(id);
 }
 
 async function uploadImage(file) {
@@ -207,7 +216,7 @@ async function uploadImage(file) {
   await githubRequest(`/repos/${adminConfig.owner}/${adminConfig.repo}/contents/${path}`, {
     method: "PUT",
     body: JSON.stringify({
-      message: `Upload product image: ${safeName}`,
+      message: `上传商品图片：${safeName}`,
       content: base64,
       branch: adminConfig.branch,
     }),
@@ -217,35 +226,43 @@ async function uploadImage(file) {
 }
 
 async function deleteProduct() {
-  requireToken();
-  if (!selectedProductId) return;
-  const product = store.products.find((item) => item.id === selectedProductId);
-  const confirmed = window.confirm(`Delete ${product?.name || "this product"}?`);
-  if (!confirmed) return;
+  try {
+    requireToken();
+    if (!selectedProductId) return;
+    const product = store.products.find((item) => item.id === selectedProductId);
+    const confirmed = window.confirm(`确定删除「${product?.name || "这个商品"}」吗？`);
+    if (!confirmed) return;
 
-  store.products = store.products.filter((item) => item.id !== selectedProductId);
-  await publishStoreData(`Delete product: ${product?.name || selectedProductId}`);
-  selectedProductId = null;
-  showToast("Product deleted and published.");
-  await loadAdminData();
+    store.products = store.products.filter((item) => item.id !== selectedProductId);
+    await publishStoreData(`删除商品：${product?.name || selectedProductId}`);
+    selectedProductId = null;
+    showToast("商品已删除并发布。");
+    await loadAdminData();
+  } catch (error) {
+    showToast(error.message);
+  }
 }
 
 async function saveSettings(event) {
   event.preventDefault();
-  requireToken();
-  const values = Object.fromEntries(new FormData(settingsForm));
+  try {
+    requireToken();
+    const values = Object.fromEntries(new FormData(settingsForm));
 
-  store.settings = {
-    business_name: values.business_name,
-    order_email: values.order_email,
-    contact_heading: values.contact_heading,
-    contact_body: values.contact_body,
-    ships_from: values.ships_from,
-    payment_methods: values.payment_methods,
-  };
+    store.settings = {
+      business_name: values.business_name,
+      order_email: values.order_email,
+      contact_heading: values.contact_heading,
+      contact_body: values.contact_body,
+      ships_from: values.ships_from,
+      payment_methods: values.payment_methods,
+    };
 
-  await publishStoreData("Update contact and payment settings");
-  showToast("Settings saved and published.");
+    await publishStoreData("更新联系方式和付款方式");
+    showToast("设置已保存并发布。");
+  } catch (error) {
+    showToast(error.message);
+  }
 }
 
 async function publishStoreData(message) {
@@ -267,7 +284,7 @@ async function publishStoreData(message) {
 async function githubRequest(path, options = {}) {
   const token = getToken();
   if (!token) {
-    throw new Error("Paste and save a GitHub token first.");
+    throw new Error("请先粘贴并保存 GitHub token。");
   }
 
   const response = await fetch(`https://api.github.com${path}`, {
@@ -283,7 +300,7 @@ async function githubRequest(path, options = {}) {
 
   if (!response.ok) {
     const detail = await response.json().catch(() => ({}));
-    throw new Error(detail.message || `GitHub request failed: ${response.status}`);
+    throw new Error(detail.message || `GitHub 请求失败：${response.status}`);
   }
 
   return response.json();
@@ -295,7 +312,7 @@ function getToken() {
 
 function requireToken() {
   if (!getToken()) {
-    throw new Error("Paste and save a GitHub token first.");
+    throw new Error("请先粘贴并保存 GitHub token。");
   }
 }
 
@@ -351,6 +368,18 @@ function slugify(value) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
   return slug || `product-${Date.now()}`;
+}
+
+function categoryLabel(value) {
+  const labels = {
+    chew: "咀嚼玩具",
+    tug: "拔河玩具",
+    puzzle: "益智玩具",
+    bundle: "套装",
+    plush: "毛绒玩具",
+    sale: "促销",
+  };
+  return labels[value] || value || "未分类";
 }
 
 let toastTimer;
