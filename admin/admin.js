@@ -1,4 +1,13 @@
-const adminConfig = window.CORGINOVA_ADMIN || {};
+const adminConfig = {
+  username: "admin",
+  password: "laobinzi123",
+  owner: "byemolei",
+  repo: "corginova-toys",
+  branch: "main",
+  dataPath: "data/site-data.json",
+  uploadDir: "assets/uploads",
+  ...(window.CORGINOVA_ADMIN || {}),
+};
 const loginPanel = document.querySelector("[data-login-panel]");
 const adminShell = document.querySelector("[data-admin-shell]");
 const loginForm = document.querySelector("[data-login-form]");
