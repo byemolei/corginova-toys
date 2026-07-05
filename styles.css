@@ -184,19 +184,6 @@ button {
   isolation: isolate;
 }
 
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    linear-gradient(110deg, transparent 0 36%, rgba(117, 255, 184, 0.1) 42%, transparent 50%),
-    linear-gradient(75deg, transparent 0 58%, rgba(255, 211, 92, 0.12) 64%, transparent 72%);
-  mix-blend-mode: screen;
-  animation: heroPrism 8s ease-in-out infinite alternate;
-}
-
 .hero-media {
   position: absolute;
   inset: 0;
@@ -218,50 +205,6 @@ button {
   background:
     linear-gradient(90deg, rgba(7, 11, 22, 0.96) 0%, rgba(7, 11, 22, 0.76) 40%, rgba(7, 11, 22, 0.28) 76%),
     linear-gradient(0deg, rgba(7, 11, 22, 0.98) 0%, transparent 38%);
-}
-
-.hero-orbit {
-  position: absolute;
-  border: 1px solid rgba(55, 232, 255, 0.28);
-  border-radius: 50%;
-  box-shadow: inset 0 0 35px rgba(55, 232, 255, 0.1), 0 0 45px rgba(255, 79, 216, 0.12);
-  pointer-events: none;
-}
-
-.hero-ribbons {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.hero-ribbons span {
-  position: absolute;
-  width: 48vw;
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, transparent, rgba(55, 232, 255, 0.88), rgba(255, 79, 216, 0.78), transparent);
-  filter: drop-shadow(0 0 18px rgba(55, 232, 255, 0.54));
-  transform: rotate(-18deg);
-  animation: ribbonFly 8s linear infinite;
-}
-
-.hero-ribbons span:nth-child(1) {
-  top: 24%;
-  right: -18%;
-}
-
-.hero-ribbons span:nth-child(2) {
-  top: 52%;
-  right: -28%;
-  animation-delay: -2.5s;
-}
-
-.hero-ribbons span:nth-child(3) {
-  top: 75%;
-  right: -12%;
-  animation-delay: -5s;
 }
 
 .hero-showcase {
@@ -304,23 +247,6 @@ button {
   top: 0;
   transform: rotate(4deg) scale(0.78);
   animation-delay: -3.1s;
-}
-
-.orbit-one {
-  right: 7vw;
-  top: 18%;
-  width: 260px;
-  height: 260px;
-  animation: orbitSpin 18s linear infinite;
-}
-
-.orbit-two {
-  right: 24vw;
-  bottom: 18%;
-  width: 150px;
-  height: 150px;
-  border-color: rgba(255, 211, 92, 0.35);
-  animation: orbitSpin 14s linear infinite reverse;
 }
 
 .hero-content {
@@ -1006,12 +932,6 @@ details p {
   }
 }
 
-@keyframes orbitSpin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @keyframes tickerMove {
   from {
     transform: translateX(0);
@@ -1037,28 +957,6 @@ details p {
 @keyframes gridDrift {
   to {
     transform: translate3d(-82px, -114px, 0);
-  }
-}
-
-@keyframes heroPrism {
-  from {
-    opacity: 0.42;
-    transform: translateX(-2%);
-  }
-
-  to {
-    opacity: 0.78;
-    transform: translateX(2%);
-  }
-}
-
-@keyframes ribbonFly {
-  from {
-    transform: translateX(0) rotate(-18deg);
-  }
-
-  to {
-    transform: translateX(-120vw) rotate(-18deg);
   }
 }
 
@@ -1098,7 +996,6 @@ details p {
 
   body::before,
   body::after,
-  .hero-ribbons,
   .hero-showcase {
     animation: none !important;
   }
@@ -1192,10 +1089,6 @@ details p {
 
   .hero-showcase {
     display: none;
-  }
-
-  .hero-ribbons span {
-    width: 86vw;
   }
 
   .hero-content {
